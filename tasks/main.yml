@@ -1,2 +1,34 @@
 ---
 # tasks file for Nainterceptor.proxmox
+- name: Comment enterprise apt
+  replace: >
+    dest=/etc/apt/sources.list.d/pve-enterprise.list
+    regexp="^deb (.+)"
+    replace="#deb \1"
+
+- name: Install required packages
+  apt: state=installed pkg={{ item }}
+  with_items:
+    - build-essential
+
+- name: Ensure user exist
+  user: name={{ user }} groups=sudo append=yes comment="Proxmox main user" shell=/bin/bash password={{ user_password }}
+
+- name: Ensure user key exist
+  authorized_key: user={{ user }} key="{{ lookup('file', pub_key_path) }}"
+
+- name: Configure resolv
+  template: src=../files/resolv.conf.j2 dest=/etc/resolv.conf
+
+- name: Configure network
+  template: src=../files/interfaces.j2 dest=/etc/network/interfaces
+  notify:
+   - Restart network
+
+- name: Configure Sysctl.conf
+  copy: src=../files/sysctl.conf dest=/etc/sysctl.d/00-custom.conf
+  notify:
+    - Reload sysctl.conf
+
+- name: visudo NOPASSWD
+  lineinfile: dest=/etc/sudoers state=present regexp='^%sudo ALL\=' line='%sudo ALL=(ALL) NOPASSWD:ALL' validate='visudo -cf %s'

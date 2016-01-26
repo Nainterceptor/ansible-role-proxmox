@@ -1,2 +1,6 @@
 ---
 # defaults file for Nainterceptor.proxmox
+domain_resolv: localhost
+nat_routing:
+  - ports: [80]
+    destination: 10.0.0.1

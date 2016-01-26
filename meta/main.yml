@@ -8,4 +8,4 @@ galaxy_info:
     - name: Debian
       versions:
         - 8
-dependencies: [Nainterceptor.common]
+dependencies: [Nainterceptor.common, Nainterceptor.dibbler]
